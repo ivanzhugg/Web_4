@@ -1,7 +1,7 @@
 <?php
 require_once("db.php");
 
-// Собираем данные из POST
+
 $fio = trim($_POST["fio"]);
 $phone = trim($_POST["phone"]);
 $email = trim($_POST["email"]);
@@ -13,7 +13,6 @@ $contract = isset($_POST["contract"]) ? "on" : "";
 
 $errors = [];
 
-// Валидация
 if (empty($fio) || !preg_match("/^[а-яА-Яa-zA-Z\s\-]+$/u", $fio)) {
     $errors["fio"] = "ФИО может содержать только буквы, пробелы и дефис.";
 }
@@ -39,7 +38,7 @@ if (empty($contract)) {
     $errors["contract"] = "Вы должны согласиться с контрактом.";
 }
 
-// Сохраняем данные и ошибки в cookies
+
 $data = [
     "fio" => $fio,
     "phone" => $phone,
@@ -58,7 +57,7 @@ if (!empty($errors)) {
     exit();
 }
 
-// Успешно — сохраняем в БД
+
 $stmt = $conn->prepare("INSERT INTO users (name, phone, email, date, gender, info) VALUES (?, ?, ?, ?, ?, ?)");
 $stmt->bind_param("ssssss", $fio, $phone, $email, $date, $gender, $info);
 if (!$stmt->execute()) {
@@ -67,7 +66,7 @@ if (!$stmt->execute()) {
 $user_id = $stmt->insert_id;
 $stmt->close();
 
-// Языки
+
 foreach ($languages as $lang_name) {
     $lang_name = trim($lang_name);
     $stmt = $conn->prepare("SELECT id FROM languages WHERE language = ?");
@@ -90,10 +89,9 @@ foreach ($languages as $lang_name) {
     $link_stmt->close();
 }
 
-// Сохраняем данные на год
+
 setcookie("form_saved", json_encode($data), time() + 365*24*60*60, "/");
 
-// Удаляем временные cookies
 setcookie("form_data", "", time() - 3600, "/");
 setcookie("form_errors", "", time() - 3600, "/");
 
